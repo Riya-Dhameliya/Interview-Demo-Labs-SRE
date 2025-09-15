@@ -1,0 +1,12 @@
+# Persistent Volume Claim (PVC)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce   
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 5Gi   
