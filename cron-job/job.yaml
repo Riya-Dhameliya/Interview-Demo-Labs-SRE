@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: test-cron
+spec:
+  schedule: "*/1 * * "               
+  concurrencyPolicy: Allow            
+  startingDeadlineSeconds: 5           
+  successfulJobsHistoryLimit: "3"      
+  failedJobsHistoryLimit: 0             
+  jobTemplate:
+    spec:
+      backoffLimit: "2"                 
+      template:
+        spec:
+          containers:
+          - name: job
+            image: busybox
+            command: ["sleep", "15"]    
+          restartPolicy: Always         
