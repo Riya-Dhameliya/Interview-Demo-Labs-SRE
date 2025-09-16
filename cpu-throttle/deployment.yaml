@@ -1,0 +1,30 @@
+# cpu-throttle-lab.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpu-throttle-demo
+  namespace: sre-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cpu-throttle-demo
+  template:
+    metadata:
+      labels:
+        app: cpu-throttle-demo
+    spec:
+      containers:
+      - name: stress
+        image: polinux/stress
+        args: ["--cpu", "4"]
+        resources:
+          requests:
+            cpu: "50m"          
+          limits:
+            cpu: "100m"         
+        livenessProbe:          
+          exec:
+            command: ["ls"]
+          periodSeconds: 5
+          timeoutSeconds: 1
