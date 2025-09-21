@@ -1,20 +1,27 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: test-cron
+  name: daily-sales-report
 spec:
-  schedule: "*/1 * * "               
-  concurrencyPolicy: Allow            
-  startingDeadlineSeconds: 5           
-  successfulJobsHistoryLimit: "3"      
-  failedJobsHistoryLimit: 0             
+  schedule: "0 2 */2 * *"
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      backoffLimit: "2"                 
       template:
         spec:
           containers:
-          - name: job
-            image: busybox
-            command: ["sleep", "15"]    
-          restartPolicy: Always         
+          - name: report-generator
+            image: company/report-generator:1.2.3
+            env:
+            - name: S3_BUCKET
+              value: "daily-reports"
+            - name: REPORT_PATH
+              value: "/tmp/report.csv"
+            resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "256Mi"
+                cpu: "200m"
+          restartPolicy: OnFailure
