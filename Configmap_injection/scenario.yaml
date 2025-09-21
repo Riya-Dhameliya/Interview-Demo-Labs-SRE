@@ -1,26 +1,30 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: app-config
+  name: payment-config
+  namespace: production
 data:
-  APP_MODE: "prod"
+  PAYMENT_API_KEY: "xvshgfetfrgdehwkjekfg"
+  PAYMENT_TIMEOUT: "30"
+
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: config-test
+  name: payment-service
+  namespace: production
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: config-test
+      app: payment-service
   template:
     metadata:
       labels:
-        app: config-test
+        app: payment-service
     spec:
       containers:
-      - name: test
-        image: busybox
-        command: ["sh", "-c", "echo Mode: $APP_MODE && sleep 3600"]
-        
+        - name: payment-container
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
