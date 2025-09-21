@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: analytics-app
+  name: analytics-ingestor-app
 data:
   ingestor.py: |
     import time
 
     memory_buffer = []
 
-    print("Analytics Ingestor started... Memory usage will rapidly grow.")
+    print("analytics-ingestor Ingestor started... Memory usage will rapidly grow.")
 
     while True:
         memory_buffer.append("x" * 1024 * 1024 * 25)  # 25MB per loop
@@ -17,19 +17,19 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: analytics
+  name: analytics-ingestor
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: analytics
+      app: analytics-ingestor
   template:
     metadata:
       labels:
-        app: analytics
+        app: analytics-ingestor
     spec:
       containers:
-      - name: analytics
+      - name: analytics-ingestor
         image: python:3.11-slim
         command: ["python", "-u", "/app/ingestor.py"]
         resources:
@@ -43,4 +43,4 @@ spec:
       volumes:
       - name: app-volume
         configMap:
-          name: analytics-app
+          name: analytics-ingestor-app
