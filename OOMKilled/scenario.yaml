@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: analytics-ingestor-app
+  name: analytics-app
 data:
   ingestor.py: |
     import time
@@ -17,19 +17,19 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: analytics-ingestor
+  name: analytics
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: analytics-ingestor
+      app: analytics
   template:
     metadata:
       labels:
-        app: analytics-ingestor
+        app: analytics
     spec:
       containers:
-      - name: analytics-ingestor
+      - name: analytics
         image: python:3.11-slim
         command: ["python", "-u", "/app/ingestor.py"]
         resources:
@@ -43,4 +43,4 @@ spec:
       volumes:
       - name: app-volume
         configMap:
-          name: analytics-ingestor-app
+          name: analytics-app
