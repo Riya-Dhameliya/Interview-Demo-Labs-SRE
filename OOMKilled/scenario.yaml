@@ -8,13 +8,11 @@ data:
 
     memory_buffer = []
 
-    print("Analytics Ingestor started... Memory usage will slowly grow within limits.")
+    print("Analytics Ingestor started... Memory usage will rapidly grow.")
 
     while True:
-        memory_buffer.append("x" * 1024 * 1024 * 5)
-        if len(memory_buffer) > 40:
-            memory_buffer.pop(0)
-        time.sleep(0.5)
+        memory_buffer.append("x" * 1024 * 1024 * 25)  # 25MB per loop
+        time.sleep(1)
 ---
 apiVersion: apps/v1
 kind: Deployment
