@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sys-load-demo
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flux-service
+  namespace: sys-load-demo
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      tier: backend
+  template:
+    metadata:
+      labels:
+        tier: backend
+        env: staging
+    spec:
+      containers:
+      - name: web-server
+        image: nginx:latest
+        resources:
+          requests:
+            cpu: "15m"
+            memory: "64Mi"
