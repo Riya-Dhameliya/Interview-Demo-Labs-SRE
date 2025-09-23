@@ -1,29 +1,25 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: sys-load-demo
+#!/bin/bash
 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: flux-service
-  namespace: sys-load-demo
-spec:
-  replicas: 5
-  selector:
-    matchLabels:
-      tier: backend
-  template:
-    metadata:
-      labels:
-        tier: backend
-        env: staging
-    spec:
-      containers:
-      - name: web-server
-        image: nginx:latest
-        resources:
-          requests:
-            cpu: "15m"
-            memory: "64Mi"
+TARGET_USAGE=90       
+FILE_PREFIX="/tmp/testfile"
+FILE_SIZE="1G"       
+COUNTER=1
+
+while true; do
+    # Get current usage percentage of /tmp (remove % sign)
+    USAGE=$(df -h /tmp | awk 'NR==2 {gsub("%","",$5); print $5}')
+    
+    echo "Current /tmp usage: $USAGE%"
+    
+    # Stop if usage >= TARGET_USAGE
+    if [ "$USAGE" -ge "$TARGET_USAGE" ]; then
+        echo "Reached target usage of $TARGET_USAGE%. Stopping."
+        break
+    fi
+    
+    # Allocate a file chunk
+    sudo fallocate -l $FILE_SIZE "${FILE_PREFIX}_${COUNTER}"
+    echo "Created ${FILE_PREFIX}_${COUNTER} of size $FILE_SIZE"
+    
+    ((COUNTER++))
+done
