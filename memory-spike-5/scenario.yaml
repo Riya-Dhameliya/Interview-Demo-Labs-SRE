@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: analytics
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service
+  namespace: analytics
+  labels:
+    app: analytics-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: analytics-service
+  template:
+    metadata:
+      labels:
+        app: analytics-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+      - name: analytics-app
+        image: busybox
+        command: ["sh", "-c", "while true; do echo 'processing'; sleep 1; done"]
+        resources:
+          limits:
+            memory: "256Mi"
+          requests:
+            memory: "256Mi"
+      - name: memory-stress
+        image: polinux/stress
+        command: ["stress"]
+        args: ["--vm", "1", "--vm-bytes", "300M", "--vm-hang", "0"]
+        resources:
+          limits:
+            memory: "256Mi"
+          requests:
+            memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-service
+  namespace: analytics
+spec:
+  selector:
+    app: analytics-service
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
