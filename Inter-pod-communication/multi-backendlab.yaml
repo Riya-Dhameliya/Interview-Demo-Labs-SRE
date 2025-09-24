@@ -1,0 +1,137 @@
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend-ns
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: frontend-ns
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-v1
+  namespace: backend-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-v1
+  template:
+    metadata:
+      labels:
+        app: backend-v1
+    spec:
+      containers:
+      - name: backend
+        image: hashicorp/http-echo
+        args: ["-text=Hello from Backend V1"]
+        ports:
+        - containerPort: 5678
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-v2
+  namespace: backend-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-v2
+  template:
+    metadata:
+      labels:
+        app: backend-v2
+    spec:
+      containers:
+      - name: backend
+        image: hashicorp/http-echo
+        args: ["-text=Hello from Backend V2"]
+        ports:
+        - containerPort: 5678
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-v3
+  namespace: backend-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-v3
+  template:
+    metadata:
+      labels:
+        app: backend-v3
+    spec:
+      containers:
+      - name: backend
+        image: hashicorp/http-echo
+        args: ["-text=Hello from Backend V3 - wrong port"]
+        ports:
+        - containerPort: 5679
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-v1
+  namespace: backend-ns
+spec:
+  selector:
+    app: backend-v1-wrong  
+  ports:
+  - protocol: TCP
+    port: 5678
+    targetPort: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-v2
+  namespace: backend-ns
+spec:
+  selector:
+    app: backend-v2-wrong  
+  ports:
+  - protocol: TCP
+    port: 5678
+    targetPort: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-v3
+  namespace: backend-ns
+spec:
+  selector:
+    app: backend-v3
+  ports:
+  - protocol: TCP
+    port: 5678        
+    targetPort: 5678
+
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-all-backend
+  namespace: backend-ns
+spec:
+  podSelector: {}  # Applies to all backend pods
+  policyTypes:
+  - Ingress
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-client
+  namespace: frontend-ns
+spec:
+  containers:
+  - name: client
+    image: busybox
+    command: ["sh", "-c", "sleep 3600"]
